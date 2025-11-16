@@ -421,26 +421,29 @@ export default function FlyMeCadastro() {
     >
       <div className="max-w-3xl w-full bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-8 overflow-hidden">
 
-        {/* Cabeçalho com logo grande */}
-        <div className="flex flex-col items-center mb-6 text-center">
-          <img
-            src="/flyme-logo.png"
-            alt="FlyMe"
-            className="mb-3"
-            style={{
-              width: "220px",   // AQUI: tamanho da logo
-              height: "auto",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
-          <p
-            className="text-slate-700 text-base mt-1"
-            style={{ fontFamily: "'Dancing Script', cursive" }}
-          >
-            Aprender é a forma mais bonita de voar.
-          </p>
-        </div>
+{/* Cabeçalho com logo grande */}
+<div className="flex flex-col items-center mb-4 text-center">
+  <img
+    src="/flyme-logo.png"
+    alt="FlyMe"
+    className="block mb-1"
+    style={{
+      width: "260px",   // logo maior
+      height: "auto",
+      objectFit: "contain",
+    }}
+  />
+  <p
+    className="text-slate-700 text-base"
+    style={{
+      fontFamily: "'Dancing Script', cursive",
+      marginTop: "0.15rem", // cola um pouco mais na logo
+    }}
+  >
+    Aprender é a forma mais bonita de voar.
+  </p>
+</div>
+
 
         <Stepper current={step} />
 
