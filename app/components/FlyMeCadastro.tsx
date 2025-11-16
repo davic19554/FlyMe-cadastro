@@ -424,16 +424,13 @@ export default function FlyMeCadastro() {
 {/* Cabeçalho com logo grande */}
 {/* Cabeçalho corrigido — compacto e profissional */}
 <div className="flex flex-col items-center text-center" style={{ marginBottom: "0.5rem" }}>
-  
   <img
     src="/flyme-logo.png"
     alt="FlyMe Logo"
     style={{
-      width: "290px",      // logo maior
+      width: "260px",
       height: "auto",
       objectFit: "contain",
-      marginBottom: "0.15rem",  // cola no slogan
-      marginTop: "0.2rem"
     }}
   />
 
@@ -442,13 +439,12 @@ export default function FlyMeCadastro() {
       fontFamily: "'Dancing Script', cursive",
       fontSize: "1.1rem",
       marginTop: "0rem",
-      marginBottom: "0.3rem"   // cola no stepper
+      marginBottom: "0.3rem",
     }}
     className="text-slate-700"
   >
     Aprender é a forma mais bonita de voar.
   </p>
-
 </div>
 
         <Stepper current={step} />
