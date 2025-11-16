@@ -50,12 +50,14 @@ async function sendEmailJS(params: Record<string, any>): Promise<{
     });
     if (!res.ok) {
       let msg = "";
-      try { msg = await res.text(); } catch {}
+      try {
+        msg = await res.text();
+      } catch {}
       return { ok: false, error: msg || `HTTP ${res.status}` };
     }
     return { ok: true };
   } catch (e: any) {
-    const txt = e?.name === "AbortError" ? "timeout" : (e?.message || String(e));
+    const txt = e?.name === "AbortError" ? "timeout" : e?.message || String(e);
     return { ok: false, skipped: true, error: txt };
   }
 }
@@ -87,13 +89,19 @@ const Svg = ({ children, size = 18, className = "", ...rest }: any) => (
   </svg>
 );
 const CheckIcon = (p: any) => (
-  <Svg {...p}><path d="M20 6 9 17 4 12" /></Svg>
+  <Svg {...p}>
+    <path d="M20 6 9 17 4 12" />
+  </Svg>
 );
 const ChevronLeftIcon = (p: any) => (
-  <Svg {...p}><path d="M15 18 9 12 15 6" /></Svg>
+  <Svg {...p}>
+    <path d="M15 18 9 12 15 6" />
+  </Svg>
 );
 const ChevronRightIcon = (p: any) => (
-  <Svg {...p}><path d="M9 18 15 12 9 6" /></Svg>
+  <Svg {...p}>
+    <path d="M9 18 15 12 9 6" />
+  </Svg>
 );
 const SparklesIcon = (p: any) => (
   <Svg {...p}>
@@ -122,7 +130,9 @@ const formatCEP = (v: string) => {
 };
 const formatDateBR = (v: string) => {
   const d = onlyDigits(v).slice(0, 8);
-  const p1 = d.slice(0, 2), p2 = d.slice(2, 4), p3 = d.slice(4, 8);
+  const p1 = d.slice(0, 2),
+    p2 = d.slice(2, 4),
+    p3 = d.slice(4, 8);
   let out = p1;
   if (p2) out += `/${p2}`;
   if (p3) out += `/${p3}`;
@@ -130,7 +140,10 @@ const formatDateBR = (v: string) => {
 };
 const formatCPF = (v: string) => {
   const d = onlyDigits(v).slice(0, 11);
-  const p1 = d.slice(0, 3), p2 = d.slice(3, 6), p3 = d.slice(6, 9), p4 = d.slice(9, 11);
+  const p1 = d.slice(0, 3),
+    p2 = d.slice(3, 6),
+    p3 = d.slice(6, 9),
+    p4 = d.slice(9, 11);
   let out = p1;
   if (p2) out += `.${p2}`;
   if (p3) out += `.${p3}`;
@@ -251,16 +264,16 @@ const Stepper = ({ current }: { current: number }) => {
 
 // ===================== Componente principal =====================
 export default function FlyMeCadastro() {
-
-  // Apenas overflow-x e scrollbar escondida (NÃO mexe em fonte!)
+  // overflow-x e scrollbar (sem mexer em fonte)
   React.useEffect(() => {
     const css = document.createElement("style");
     css.innerHTML =
       "html,body{overflow-x:hidden;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
     document.head.appendChild(css);
-
     return () => {
-      try { document.head.removeChild(css); } catch {}
+      try {
+        document.head.removeChild(css);
+      } catch {}
     };
   }, []);
 
@@ -289,7 +302,7 @@ export default function FlyMeCadastro() {
     complemento: "",
   });
 
-  // Helpers set
+  // Helpers
   const setVal =
     (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -300,7 +313,6 @@ export default function FlyMeCadastro() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((f) => ({ ...f, [key]: (e.target.value || "").toUpperCase() }));
 
-  // CEP com auto-preenchimento
   const onCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const masked = formatCEP(e.target.value);
     setForm((f) => ({ ...f, cep: masked }));
@@ -330,7 +342,7 @@ export default function FlyMeCadastro() {
         : { ...f, interesses: [...cur, opt] };
     });
 
-  // Validações leves por etapa
+  // Validações
   const validStep1 = () => {
     const { responsavel, email, telefone, criancaNome, dataNascimento, idade } = form;
     return (
@@ -392,7 +404,7 @@ export default function FlyMeCadastro() {
       setEmailStatus("error");
       const hint =
         (res.error || "").toLowerCase().includes("recipients address is empty")
-          ? "No EmailJS, use {{to_email}} no campo 'To email'."
+          ? "No EmailJS, em 'To email' use {{to_email}} ou defina um destinatário fixo."
           : "";
       setEmailError((res.error || "Erro desconhecido") + (hint ? " — " + hint : ""));
     }
@@ -409,12 +421,18 @@ export default function FlyMeCadastro() {
     >
       <div className="max-w-3xl w-full bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-8 overflow-hidden">
 
-        {/* Cabeçalho com LOGO */}
+        {/* Cabeçalho com logo grande */}
         <div className="flex flex-col items-center mb-6 text-center">
           <img
             src="/flyme-logo.png"
             alt="FlyMe"
-            className="h-20 md:h-24 mb-2"
+            className="mb-3"
+            style={{
+              width: "220px",   // AQUI: tamanho da logo
+              height: "auto",
+              objectFit: "contain",
+              display: "block",
+            }}
           />
           <p
             className="text-slate-700 text-base mt-1"
@@ -426,20 +444,24 @@ export default function FlyMeCadastro() {
 
         <Stepper current={step} />
 
-        {/* =============== Etapa 1 =============== */}
+        {/* Etapa 1 */}
         {step === 1 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="block">
               <span className={labelCls}>Nome do Responsável</span>
-              <input className={inputCls} style={inputStyle}
+              <input
+                className={inputCls}
+                style={inputStyle}
                 value={form.responsavel}
                 onChange={setVal("responsavel")}
               />
             </label>
-
             <label className="block">
               <span className={labelCls}>E-mail</span>
-              <input type="email" className={inputCls} style={inputStyle}
+              <input
+                type="email"
+                className={inputCls}
+                style={inputStyle}
                 value={form.email}
                 onChange={setVal("email")}
               />
@@ -449,7 +471,6 @@ export default function FlyMeCadastro() {
                 </div>
               )}
             </label>
-
             <label className="block">
               <span className={labelCls}>Telefone</span>
               <input
@@ -458,15 +479,11 @@ export default function FlyMeCadastro() {
                 style={inputStyle}
                 value={form.telefone}
                 onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    telefone: formatPhone(e.target.value)
-                  }))
+                  setForm((f) => ({ ...f, telefone: formatPhone(e.target.value) }))
                 }
                 placeholder="(34) 99999-9999"
               />
             </label>
-
             <label className="block">
               <span className={labelCls}>CPF do Responsável (opcional)</span>
               <input
@@ -475,23 +492,20 @@ export default function FlyMeCadastro() {
                 style={inputStyle}
                 value={form.cpf}
                 onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    cpf: formatCPF(e.target.value)
-                  }))
+                  setForm((f) => ({ ...f, cpf: formatCPF(e.target.value) }))
                 }
                 placeholder="000.000.000-00"
               />
             </label>
-
             <label className="block">
               <span className={labelCls}>Nome da Criança</span>
-              <input className={inputCls} style={inputStyle}
+              <input
+                className={inputCls}
+                style={inputStyle}
                 value={form.criancaNome}
                 onChange={setVal("criancaNome")}
               />
             </label>
-
             <label className="block">
               <span className={labelCls}>Data de Nascimento da Criança</span>
               <input
@@ -502,13 +516,12 @@ export default function FlyMeCadastro() {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    dataNascimento: formatDateBR(e.target.value)
+                    dataNascimento: formatDateBR(e.target.value),
                   }))
                 }
                 placeholder="dd/mm/aaaa"
               />
             </label>
-
             <label className="block md:col-span-2">
               <span className={labelCls}>Faixa Etária</span>
               <select
@@ -526,7 +539,7 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
-        {/* =============== Etapa 2 =============== */}
+        {/* Etapa 2 */}
         {step === 2 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -535,13 +548,11 @@ export default function FlyMeCadastro() {
                 Necessidades a serem desenvolvidas
               </span>
             </div>
-
             {!form.idade && (
               <p className="text-sm text-slate-500 mb-2">
                 Selecione a faixa etária na etapa anterior para ver as opções.
               </p>
             )}
-
             <div className="flex flex-wrap gap-2">
               {necessidadesOptions.map((opt) => (
                 <Chip
@@ -555,19 +566,18 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
-        {/* =============== Etapa 3 =============== */}
+        {/* Etapa 3 */}
         {step === 3 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
               <MapPinIcon className="h-4 w-4" />
               <span className="text-sm text-slate-700 font-medium">Endereço</span>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
               <label className="block md:col-span-1">
                 <span className={labelCls}>CEP</span>
-                <input type="text"
+                <input
+                  type="text"
                   className={inputCls}
                   style={inputStyle}
                   value={form.cep}
@@ -575,39 +585,42 @@ export default function FlyMeCadastro() {
                   placeholder="00000-000"
                 />
               </label>
-
               <label className="block md:col-span-2">
                 <span className={labelCls}>Rua</span>
-                <input className={inputCls} style={inputStyle}
+                <input
+                  className={inputCls}
+                  style={inputStyle}
                   value={form.rua}
                   onChange={setVal("rua")}
                 />
               </label>
-
               <label className="block">
                 <span className={labelCls}>Número</span>
-                <input className={inputCls} style={inputStyle}
+                <input
+                  className={inputCls}
+                  style={inputStyle}
                   value={form.numero}
                   onChange={setVal("numero")}
                 />
               </label>
-
               <label className="block">
                 <span className={labelCls}>Bairro</span>
-                <input className={inputCls} style={inputStyle}
+                <input
+                  className={inputCls}
+                  style={inputStyle}
                   value={form.bairro}
                   onChange={setVal("bairro")}
                 />
               </label>
-
               <label className="block">
                 <span className={labelCls}>Cidade</span>
-                <input className={inputCls} style={inputStyle}
+                <input
+                  className={inputCls}
+                  style={inputStyle}
                   value={form.cidade}
                   onChange={setVal("cidade")}
                 />
               </label>
-
               <label className="block">
                 <span className={labelCls}>UF</span>
                 <input
@@ -618,30 +631,28 @@ export default function FlyMeCadastro() {
                   onChange={setValUpper("uf")}
                 />
               </label>
-
               <label className="block md:col-span-3">
                 <span className={labelCls}>Complemento (opcional)</span>
-                <input className={inputCls} style={inputStyle}
+                <input
+                  className={inputCls}
+                  style={inputStyle}
                   value={form.complemento}
                   onChange={setVal("complemento")}
                 />
               </label>
-
             </div>
           </div>
         )}
 
-        {/* =============== Etapa 4 =============== */}
+        {/* Etapa 4 */}
         {step === 4 && (
           <div className="space-y-4">
-
             <div className="flex items-center gap-2 mb-1">
               <SparklesIcon className="h-4 w-4" />
               <span className="text-sm text-slate-700 font-medium">
                 Revise seus dados antes de concluir
               </span>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 ["Responsável", form.responsavel],
@@ -653,9 +664,7 @@ export default function FlyMeCadastro() {
                 ["Faixa etária", form.idade],
                 ["Necessidades", (form.interesses || []).join(", ")],
               ].map(([l, v]) => (
-                <div key={l as string}
-                  className="p-3 rounded-xl border bg-white"
-                >
+                <div key={l as string} className="p-3 rounded-xl border bg-white">
                   <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1">
                     {l}
                   </div>
@@ -665,12 +674,10 @@ export default function FlyMeCadastro() {
                 </div>
               ))}
             </div>
-
             <div className="flex items-center gap-2 mt-2">
               <MapPinIcon className="h-4 w-4" />
               <span className="text-sm text-slate-700 font-medium">Endereço</span>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 ["CEP", form.cep],
@@ -681,9 +688,7 @@ export default function FlyMeCadastro() {
                 ["UF", form.uf],
                 ["Complemento", form.complemento],
               ].map(([l, v]) => (
-                <div key={l as string}
-                  className="p-3 rounded-xl border bg-white md:col-span-1"
-                >
+                <div key={l as string} className="p-3 rounded-xl border bg-white md:col-span-1">
                   <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1">
                     {l}
                   </div>
@@ -693,7 +698,6 @@ export default function FlyMeCadastro() {
                 </div>
               ))}
             </div>
-
             <div className="flex items-center justify-center mt-4">
               <button
                 type="button"
@@ -704,24 +708,19 @@ export default function FlyMeCadastro() {
                 Concluir cadastro
               </button>
             </div>
-
           </div>
         )}
 
-        {/* =============== Etapa 5 =============== */}
+        {/* Etapa 5 */}
         {step === 5 && (
           <div className="p-10 border rounded-2xl bg-white shadow text-center">
-
             <h3 className="text-2xl font-extrabold" style={{ color: FLYME.blue }}>
               Cadastro concluído! 🎉
             </h3>
-
             <p className="text-slate-700 mt-2">Bem-vindo(a) à FlyMe.</p>
-
             <p className="mt-4 text-lg font-medium" style={{ color: FLYME.red }}>
               “Aprender é a forma mais bonita de voar.”
             </p>
-
             <div className="mt-4 text-sm min-h-[24px]">
               {emailStatus === "sending" && (
                 <span className="text-slate-500">Enviando e-mail de boas-vindas…</span>
@@ -743,7 +742,6 @@ export default function FlyMeCadastro() {
                 </span>
               )}
             </div>
-
             <div className="mt-8 flex items-center justify-center">
               <button
                 type="button"
@@ -758,10 +756,9 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
-        {/* =============== Navegação =============== */}
+        {/* Navegação */}
         {step <= 3 && (
           <div className="flex items-center justify-center gap-3 mt-6">
-
             <button
               type="button"
               onClick={prev}
@@ -772,7 +769,6 @@ export default function FlyMeCadastro() {
               <ChevronLeftIcon className="h-4 w-4" />
               Voltar
             </button>
-
             <button
               type="button"
               onClick={next}
@@ -786,10 +782,8 @@ export default function FlyMeCadastro() {
             >
               Avançar <ChevronRightIcon className="h-4 w-4" />
             </button>
-
           </div>
         )}
-
       </div>
     </div>
   );
