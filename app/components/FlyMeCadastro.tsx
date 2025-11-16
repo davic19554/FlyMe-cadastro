@@ -443,7 +443,6 @@ export default function FlyMeCadastro() {
         marginBottom: "0.4rem",     // encosta no stepper
       }}
     >
-      Aprender é a forma mais bonita de voar.
     </p>
 </div>
 
