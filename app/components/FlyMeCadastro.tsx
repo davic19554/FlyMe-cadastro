@@ -4,12 +4,6 @@ import React from "react";
 
 /**
  * ===================== Config EmailJS =====================
- * Use as credenciais do seu template. Estes valores são públicos (frontend).
- * No EmailJS, garanta:
- * - serviceId: service_6x798xo
- * - templateId: template_h7cunrh
- * - publicKey:  TvIV5KonHS_sED9Vh
- * - No template, em "To email", coloque {{to_email}} (ou defina destinatário fixo).
  */
 const EMAILJS = {
   serviceId: "service_6x798xo",
@@ -17,7 +11,7 @@ const EMAILJS = {
   publicKey: "TvIV5KonHS_sED9Vh",
 } as const;
 
-// ===================== Util: timeout para fetch =====================
+// ===================== Util: Timeout =====================
 function fetchWithTimeout(
   input: RequestInfo | URL,
   init: (RequestInit & { timeoutMs?: number }) = {}
@@ -36,11 +30,10 @@ async function sendEmailJS(params: Record<string, any>): Promise<{
   error?: string;
   skipped?: boolean;
 }> {
-  // Guardas: se faltar config ou ambiente sem window/fetch, não tenta
   if (!EMAILJS.templateId || !EMAILJS.publicKey) {
     return { ok: false, skipped: true, error: "config ausente" };
   }
-  if (typeof window === "undefined" || typeof fetch === "undefined") {
+  if (typeof window === "undefined") {
     return { ok: false, skipped: true, error: "ambiente sem fetch" };
   }
   try {
@@ -55,19 +48,15 @@ async function sendEmailJS(params: Record<string, any>): Promise<{
         template_params: params,
       }),
     });
+
     if (!res.ok) {
       let msg = "";
-      try {
-        msg = await res.text();
-      } catch {}
+      try { msg = await res.text(); } catch {}
       return { ok: false, error: msg || `HTTP ${res.status}` };
     }
     return { ok: true };
   } catch (e: any) {
-    const txt =
-      e?.name === "AbortError" ? "timeout" : (e?.message || String(e));
-    // Em sandboxes/CORS podemos tratar como "skipped" para não quebrar a UI
-    return { ok: false, skipped: true, error: txt };
+    return { ok: false, skipped: true, error: e?.message || String(e) };
   }
 }
 
@@ -79,7 +68,7 @@ const FLYME = {
   off: "#fffaf3",
 } as const;
 
-// ===================== Ícones inline =====================
+// ===================== Ícones =====================
 const Svg = ({ children, size = 18, className = "", ...rest }: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -97,27 +86,32 @@ const Svg = ({ children, size = 18, className = "", ...rest }: any) => (
     {children}
   </svg>
 );
+
 const CheckIcon = (p: any) => (
   <Svg {...p}>
     <path d="M20 6 9 17 4 12" />
   </Svg>
 );
+
 const ChevronLeftIcon = (p: any) => (
   <Svg {...p}>
     <path d="M15 18 9 12 15 6" />
   </Svg>
 );
+
 const ChevronRightIcon = (p: any) => (
   <Svg {...p}>
     <path d="M9 18 15 12 9 6" />
   </Svg>
 );
+
 const SparklesIcon = (p: any) => (
   <Svg {...p}>
     <path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4" />
     <circle cx="12" cy="12" r="5" />
   </Svg>
 );
+
 const MapPinIcon = (p: any) => (
   <Svg {...p}>
     <path d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" />
@@ -160,7 +154,7 @@ const formatCPF = (v: string) => {
   return out;
 };
 
-// ===================== Necessidades por faixa etária =====================
+// ===================== Necessidades =====================
 const NECESSIDADES_BY_IDADE: Record<string, string[]> = {
   "2-4": [
     "Criatividade e Imaginação",
@@ -197,24 +191,18 @@ const NECESSIDADES_BY_IDADE: Record<string, string[]> = {
   ],
 };
 
-// ===================== UI helpers =====================
+// ===================== UI Helpers =====================
 const inputCls =
   "w-full rounded-2xl border px-4 py-2.5 mt-1 focus:ring-2 focus:outline-none transition shadow-sm bg-white text-slate-900 placeholder-slate-400";
+
 const labelCls = "text-sm text-slate-400";
+
 const inputStyle: React.CSSProperties = {
   borderColor: "#e5e7eb",
   outlineColor: FLYME.blue,
 };
 
-const Chip = ({
-  label,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  selected: boolean;
-  onToggle: () => void;
-}) => (
+const Chip = ({ label, selected, onToggle }: any) => (
   <button
     type="button"
     onClick={onToggle}
@@ -271,15 +259,14 @@ const Stepper = ({ current }: { current: number }) => {
   );
 };
 
-// ===================== Componente principal =====================
+// ===================== Componente Principal =====================
 export default function FlyMeCadastro() {
-  // Overflow-x fix + esconder scrollbar em .no-scroll (sem mexer na fonte)
+  // Fix overflow (sem mexer em fonte)
   React.useEffect(() => {
     const css = document.createElement("style");
     css.innerHTML =
       "html,body{overflow-x:hidden;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
     document.head.appendChild(css);
-
     return () => {
       try {
         document.head.removeChild(css);
@@ -287,7 +274,7 @@ export default function FlyMeCadastro() {
     };
   }, []);
 
-  // Estado
+  // Estados
   const [step, setStep] = React.useState(1);
   const [emailStatus, setEmailStatus] = React.useState<
     "idle" | "sending" | "sent" | "error" | "skipped"
@@ -312,18 +299,18 @@ export default function FlyMeCadastro() {
     complemento: "",
   });
 
-  // Helpers set
   const setVal =
     (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    (e: any) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
+
   const setValUpper =
     (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: any) =>
       setForm((f) => ({ ...f, [key]: (e.target.value || "").toUpperCase() }));
 
-  // CEP com auto-preenchimento
-  const onCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // CEP auto
+  const onCepChange = async (e: any) => {
     const masked = formatCEP(e.target.value);
     setForm((f) => ({ ...f, cep: masked }));
     const raw = onlyDigits(masked);
@@ -345,14 +332,13 @@ export default function FlyMeCadastro() {
   };
 
   const toggleInteresse = (opt: string) =>
-    setForm((f) => {
-      const cur = f.interesses || [];
-      return cur.includes(opt)
-        ? { ...f, interesses: cur.filter((x) => x !== opt) }
-        : { ...f, interesses: [...cur, opt] };
-    });
+    setForm((f) => ({
+      ...f,
+      interesses: f.interesses.includes(opt)
+        ? f.interesses.filter((x) => x !== opt)
+        : [...f.interesses, opt],
+    }));
 
-  // Validações leves por etapa
   const validStep1 = () => {
     const { responsavel, email, telefone, criancaNome, dataNascimento, idade } = form;
     return (
@@ -364,10 +350,12 @@ export default function FlyMeCadastro() {
       ["2-4", "5-7", "8-10"].includes(idade)
     );
   };
-  const validStep2 = () => (form.interesses || []).length > 0;
+
+  const validStep2 = () => form.interesses.length > 0;
+
   const validStep3 = () => {
     const { rua, numero, bairro, cidade, uf } = form;
-    return [rua, numero, bairro, cidade, uf].every((v) => (v || "").trim().length > 0);
+    return [rua, numero, bairro, cidade, uf].every((v) => v.trim().length > 0);
   };
 
   const next = () => {
@@ -376,13 +364,13 @@ export default function FlyMeCadastro() {
     if (step === 3 && !validStep3()) return;
     setStep((s) => Math.min(5, s + 1));
   };
+
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const handleGoToClient = async () => {
     if (emailStatus === "sending") return;
 
-    // Pré-validação de e-mail
-    if (!/.+@.+\..+/.test(String(form.email || "").trim())) {
+    if (!/.+@.+\..+/.test(form.email)) {
       setEmailStatus("error");
       setEmailError("E-mail do responsável vazio ou inválido.");
       return;
@@ -393,37 +381,26 @@ export default function FlyMeCadastro() {
 
     const res = await sendEmailJS({
       to_name: form.responsavel || "Cliente",
-      to_email: String(form.email || "").trim(),
+      to_email: form.email.trim(),
       crianca: form.criancaNome,
       idade: form.idade,
       from_name: "FlyMe",
-      reply_to: String(form.email || "").trim(),
+      reply_to: form.email.trim(),
       subject: "Boas-vindas FlyMe",
     });
 
     if (res.ok) {
       setEmailStatus("sent");
       setTimeout(() => {
-        try {
-          window.location.href = "#area-do-cliente";
-        } catch {}
+        window.location.href = "#area-do-cliente";
       }, 600);
-    } else if (res.skipped) {
-      setEmailStatus("skipped");
-      setEmailError(res.error || "envio pulado (ambiente sem rede/CORS)");
     } else {
       setEmailStatus("error");
-      const hint =
-        (res.error || "").toLowerCase().includes("recipients address is empty")
-          ? "No EmailJS, em 'To email' do template use {{to_email}} ou defina um destinatário fixo."
-          : "";
-      setEmailError((res.error || "Erro desconhecido") + (hint ? " — " + hint : ""));
+      setEmailError(res.error || "Erro desconhecido");
     }
   };
 
-  const necessidadesOptions = form.idade
-    ? NECESSIDADES_BY_IDADE[form.idade] || []
-    : [];
+  const necessidadesOptions = NECESSIDADES_BY_IDADE[form.idade] || [];
 
   return (
     <div
@@ -437,15 +414,19 @@ export default function FlyMeCadastro() {
             className="text-5xl font-extrabold tracking-tight"
             style={{
               color: FLYME.blue,
-              fontFamily: "'Scripter', cursive",
+              fontFamily: "'Dancing Script', cursive",
             }}
           >
             Fly<span style={{ color: FLYME.red }}>M</span>
             <span style={{ color: FLYME.yellow }}>e</span>
           </h1>
+
           <p
             className="text-base mt-1"
-            style={{ color: "#4b5563", fontFamily: "'Scripter', cursive" }}
+            style={{
+              color: "#4b5563",
+              fontFamily: "'Dancing Script', cursive",
+            }}
           >
             Aprender é a forma mais bonita de voar.
           </p>
@@ -465,6 +446,7 @@ export default function FlyMeCadastro() {
                 onChange={setVal("responsavel")}
               />
             </label>
+
             <label className="block">
               <span className={labelCls}>E-mail</span>
               <input
@@ -474,12 +456,13 @@ export default function FlyMeCadastro() {
                 value={form.email}
                 onChange={setVal("email")}
               />
-              {!/.+@.+\..+/.test(String(form.email || "")) && (
+              {!/.+@.+\..+/.test(form.email) && (
                 <div className="text-[11px] mt-1 text-red-600">
                   Informe um e-mail válido para receber a confirmação.
                 </div>
               )}
             </label>
+
             <label className="block">
               <span className={labelCls}>Telefone</span>
               <input
@@ -488,11 +471,15 @@ export default function FlyMeCadastro() {
                 style={inputStyle}
                 value={form.telefone}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, telefone: formatPhone(e.target.value) }))
+                  setForm((f) => ({
+                    ...f,
+                    telefone: formatPhone(e.target.value),
+                  }))
                 }
                 placeholder="(34) 99999-9999"
               />
             </label>
+
             <label className="block">
               <span className={labelCls}>CPF do Responsável (opcional)</span>
               <input
@@ -506,6 +493,7 @@ export default function FlyMeCadastro() {
                 placeholder="000.000.000-00"
               />
             </label>
+
             <label className="block">
               <span className={labelCls}>Nome da Criança</span>
               <input
@@ -515,6 +503,7 @@ export default function FlyMeCadastro() {
                 onChange={setVal("criancaNome")}
               />
             </label>
+
             <label className="block">
               <span className={labelCls}>Data de Nascimento da Criança</span>
               <input
@@ -523,11 +512,15 @@ export default function FlyMeCadastro() {
                 style={inputStyle}
                 value={form.dataNascimento}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, dataNascimento: formatDateBR(e.target.value) }))
+                  setForm((f) => ({
+                    ...f,
+                    dataNascimento: formatDateBR(e.target.value),
+                  }))
                 }
                 placeholder="dd/mm/aaaa"
               />
             </label>
+
             <label className="block md:col-span-2">
               <span className={labelCls}>Faixa Etária</span>
               <select
@@ -545,6 +538,7 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
+        {/* Etapa 2 */}
         {step === 2 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -553,17 +547,19 @@ export default function FlyMeCadastro() {
                 Necessidades a serem desenvolvidas
               </span>
             </div>
+
             {!form.idade && (
               <p className="text-sm text-slate-500 mb-2">
                 Selecione a faixa etária na etapa anterior para ver as opções.
               </p>
             )}
+
             <div className="flex flex-wrap gap-2">
               {necessidadesOptions.map((opt) => (
                 <Chip
                   key={opt}
                   label={opt}
-                  selected={(form.interesses || []).includes(opt)}
+                  selected={form.interesses.includes(opt)}
                   onToggle={() => toggleInteresse(opt)}
                 />
               ))}
@@ -571,14 +567,16 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
+        {/* Etapa 3 */}
         {step === 3 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
               <MapPinIcon className="h-4 w-4" />
               <span className="text-sm text-slate-700 font-medium">Endereço</span>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className="block md:col-span-1">
+              <label>
                 <span className={labelCls}>CEP</span>
                 <input
                   type="text"
@@ -589,7 +587,8 @@ export default function FlyMeCadastro() {
                   placeholder="00000-000"
                 />
               </label>
-              <label className="block md:col-span-2">
+
+              <label className="md:col-span-2">
                 <span className={labelCls}>Rua</span>
                 <input
                   className={inputCls}
@@ -598,7 +597,8 @@ export default function FlyMeCadastro() {
                   onChange={setVal("rua")}
                 />
               </label>
-              <label className="block">
+
+              <label>
                 <span className={labelCls}>Número</span>
                 <input
                   className={inputCls}
@@ -607,7 +607,8 @@ export default function FlyMeCadastro() {
                   onChange={setVal("numero")}
                 />
               </label>
-              <label className="block">
+
+              <label>
                 <span className={labelCls}>Bairro</span>
                 <input
                   className={inputCls}
@@ -616,7 +617,8 @@ export default function FlyMeCadastro() {
                   onChange={setVal("bairro")}
                 />
               </label>
-              <label className="block">
+
+              <label>
                 <span className={labelCls}>Cidade</span>
                 <input
                   className={inputCls}
@@ -625,7 +627,8 @@ export default function FlyMeCadastro() {
                   onChange={setVal("cidade")}
                 />
               </label>
-              <label className="block">
+
+              <label>
                 <span className={labelCls}>UF</span>
                 <input
                   className={inputCls}
@@ -635,7 +638,8 @@ export default function FlyMeCadastro() {
                   onChange={setValUpper("uf")}
                 />
               </label>
-              <label className="block md:col-span-3">
+
+              <label className="md:col-span-3">
                 <span className={labelCls}>Complemento (opcional)</span>
                 <input
                   className={inputCls}
@@ -648,6 +652,7 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
+        {/* Etapa 4 */}
         {step === 4 && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-1">
@@ -656,6 +661,7 @@ export default function FlyMeCadastro() {
                 Revise seus dados antes de concluir
               </span>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 ["Responsável", form.responsavel],
@@ -665,22 +671,25 @@ export default function FlyMeCadastro() {
                 ["Nome da Criança", form.criancaNome],
                 ["Nascimento", form.dataNascimento],
                 ["Faixa etária", form.idade],
-                ["Necessidades", (form.interesses || []).join(", ")],
-              ].map(([l, v]) => (
-                <div key={l as string} className="p-3 rounded-xl border bg-white">
+                ["Necessidades", form.interesses.join(", ")],
+              ].map(([label, valor]) => (
+                <div key={label} className="p-3 rounded-xl border bg-white">
                   <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1">
-                    {l}
+                    {label}
                   </div>
                   <div className="text-sm text-slate-800 break-words">
-                    {(v as string) || <span className="text-slate-400">—</span>}
+                    {valor || <span className="text-slate-400">—</span>}
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Endereço */}
             <div className="flex items-center gap-2 mt-2">
               <MapPinIcon className="h-4 w-4" />
               <span className="text-sm text-slate-700 font-medium">Endereço</span>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 ["CEP", form.cep],
@@ -690,20 +699,19 @@ export default function FlyMeCadastro() {
                 ["Cidade", form.cidade],
                 ["UF", form.uf],
                 ["Complemento", form.complemento],
-              ].map(([l, v]) => (
-                <div
-                  key={l as string}
-                  className="p-3 rounded-xl border bg-white md:col-span-1"
-                >
+              ].map(([label, valor]) => (
+                <div key={label} className="p-3 rounded-xl border bg-white">
                   <div className="text-[11px] uppercase tracking-wide text-slate-500 mb-1">
-                    {l}
+                    {label}
                   </div>
                   <div className="text-sm text-slate-800 break-words">
-                    {(v as string) || <span className="text-slate-400">—</span>}
+                    {valor || <span className="text-slate-400">—</span>}
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Botão concluir */}
             <div className="flex items-center justify-center mt-4">
               <button
                 type="button"
@@ -717,36 +725,33 @@ export default function FlyMeCadastro() {
           </div>
         )}
 
+        {/* Etapa 5 */}
         {step === 5 && (
           <div className="p-10 border rounded-2xl bg-white shadow text-center">
             <h3 className="text-2xl font-extrabold" style={{ color: FLYME.blue }}>
               Cadastro concluído! 🎉
             </h3>
+
             <p className="text-slate-700 mt-2">Bem-vindo(a) à FlyMe.</p>
+
             <p className="mt-4 text-lg font-medium" style={{ color: FLYME.red }}>
               “Aprender é a forma mais bonita de voar.”
             </p>
+
             <div className="mt-4 text-sm min-h-[24px]">
               {emailStatus === "sending" && (
                 <span className="text-slate-500">Enviando e-mail de boas-vindas…</span>
               )}
               {emailStatus === "sent" && (
-                <span className="text-green-600 font-medium">
-                  E-mail enviado com sucesso! ✉️
-                </span>
-              )}
-              {emailStatus === "skipped" && (
-                <span className="text-amber-600">
-                  Prévia: envio de e-mail pulado por restrição de ambiente.
-                </span>
+                <span className="text-green-600 font-medium">E-mail enviado com sucesso! ✉️</span>
               )}
               {emailStatus === "error" && (
                 <span className="text-red-600">
-                  Falha ao enviar e-mail.{" "}
-                  {emailError ? `Detalhes: ${emailError.slice(0, 140)}` : "Tente novamente."}
+                  Falha ao enviar e-mail. {emailError && `(${emailError})`}
                 </span>
               )}
             </div>
+
             <div className="mt-8 flex items-center justify-center">
               <button
                 type="button"
@@ -754,26 +759,9 @@ export default function FlyMeCadastro() {
                 disabled={emailStatus === "sending"}
                 className="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow text-white transition disabled:opacity-60"
                 style={{ background: FLYME.yellow }}
-                title="Envia o e-mail e vai para a área do cliente"
               >
                 {emailStatus === "sending" ? "Enviando…" : "Ir para a área do cliente"}
               </button>
-            </div>
-
-            {/* Debug do e-mail (dev-only visual, não usa process.env) */}
-            <div className="mt-6 text-xs text-slate-500 text-left">
-              <details>
-                <summary>Debug do e-mail (apenas dev)</summary>
-                <div>serviceId: {EMAILJS.serviceId}</div>
-                <div>templateId: {EMAILJS.templateId}</div>
-                <div>publicKey: {(EMAILJS.publicKey || "").slice(0, 4)}•••</div>
-                <div className="mt-2">
-                  Dica: no EmailJS, abra o template <b>{EMAILJS.templateId}</b> e coloque{" "}
-                  <code>{"{{to_email}}"}</code> no campo <i>To email</i> ou defina um
-                  destinatário fixo.
-                </div>
-                {emailError && <div className="text-red-600">Erro bruto: {emailError}</div>}
-              </details>
             </div>
           </div>
         )}
@@ -791,6 +779,7 @@ export default function FlyMeCadastro() {
               <ChevronLeftIcon className="h-4 w-4" />
               Voltar
             </button>
+
             <button
               type="button"
               onClick={next}
@@ -811,13 +800,12 @@ export default function FlyMeCadastro() {
   );
 }
 
-/* ===================== Self-tests rápidos (não quebram a UI) ===================== */
+/* Self-tests */
 (function runSelfTests() {
   if (typeof window === "undefined") return;
   try {
-    console.assert(typeof formatCEP("38400123") === "string", "CEP mask");
+    console.assert(formatCEP("38400123") === "38400-123", "CEP mask");
     console.assert(formatPhone("34987654321").includes("("), "Phone mask");
-    console.assert(NECESSIDADES_BY_IDADE["5-7"].length > 3, "Map faixa etária");
     console.assert(formatCPF("12345678901").length === 14, "CPF mask size");
     console.assert(formatDateBR("01022025") === "01/02/2025", "Date mask dd/mm/aaaa");
   } catch (e) {
@@ -825,18 +813,3 @@ export default function FlyMeCadastro() {
   }
 })();
 
-
-
-/* ===================== Self-tests rápidos (não quebram a UI) ===================== */
-(function runSelfTests() {
-  if (typeof window === "undefined") return;
-  try {
-    console.assert(typeof formatCEP("38400123") === "string", "CEP mask");
-    console.assert(formatPhone("34987654321").includes("("), "Phone mask");
-    console.assert(NECESSIDADES_BY_IDADE["5-7"].length > 3, "Map faixa etária");
-    console.assert(formatCPF("12345678901").length === 14, "CPF mask size");
-    console.assert(formatDateBR("01022025") === "01/02/2025", "Date mask dd/mm/aaaa");
-  } catch (e) {
-    console.warn("Self-tests warning", e);
-  }
-})();
