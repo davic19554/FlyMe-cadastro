@@ -273,27 +273,16 @@ const Stepper = ({ current }: { current: number }) => {
 
 // ===================== Componente principal =====================
 export default function FlyMeCadastro() {
-  // Fonte global + overflow-x fix
+  // Overflow-x fix + esconder scrollbar em .no-scroll (sem mexer na fonte)
   React.useEffect(() => {
-    // carrega a fonte Scripter de forma confiável (PC + mobile)
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Scripter&display=swap";
-    document.head.appendChild(link);
-
-    // aplica a fonte e regras de scroll
     const css = document.createElement("style");
     css.innerHTML =
-      "html,body{overflow-x:hidden;} :root,body,*{font-family:'Scripter',cursive;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
+      "html,body{overflow-x:hidden;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
     document.head.appendChild(css);
 
     return () => {
       try {
         document.head.removeChild(css);
-      } catch {}
-      try {
-        document.head.removeChild(link);
       } catch {}
     };
   }, []);
@@ -444,11 +433,22 @@ export default function FlyMeCadastro() {
       <div className="max-w-3xl w-full bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-8 overflow-hidden">
         {/* Cabeçalho */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight" style={{ color: FLYME.blue }}>
+          <h1
+            className="text-5xl font-extrabold tracking-tight"
+            style={{
+              color: FLYME.blue,
+              fontFamily: "'Scripter', cursive",
+            }}
+          >
             Fly<span style={{ color: FLYME.red }}>M</span>
             <span style={{ color: FLYME.yellow }}>e</span>
           </h1>
-          <p className="text-slate-700 text-base mt-1">Aprender é a forma mais bonita de voar.</p>
+          <p
+            className="text-base mt-1"
+            style={{ color: "#4b5563", fontFamily: "'Scripter', cursive" }}
+          >
+            Aprender é a forma mais bonita de voar.
+          </p>
         </div>
 
         <Stepper current={step} />
@@ -810,6 +810,22 @@ export default function FlyMeCadastro() {
     </div>
   );
 }
+
+/* ===================== Self-tests rápidos (não quebram a UI) ===================== */
+(function runSelfTests() {
+  if (typeof window === "undefined") return;
+  try {
+    console.assert(typeof formatCEP("38400123") === "string", "CEP mask");
+    console.assert(formatPhone("34987654321").includes("("), "Phone mask");
+    console.assert(NECESSIDADES_BY_IDADE["5-7"].length > 3, "Map faixa etária");
+    console.assert(formatCPF("12345678901").length === 14, "CPF mask size");
+    console.assert(formatDateBR("01022025") === "01/02/2025", "Date mask dd/mm/aaaa");
+  } catch (e) {
+    console.warn("Self-tests warning", e);
+  }
+})();
+
+
 
 /* ===================== Self-tests rápidos (não quebram a UI) ===================== */
 (function runSelfTests() {
