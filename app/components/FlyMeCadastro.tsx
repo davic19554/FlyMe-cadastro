@@ -451,9 +451,6 @@ export default function FlyMeCadastro() {
 
 </div>
 
-
-
-
         <Stepper current={step} />
 
         {/* Etapa 1 */}
