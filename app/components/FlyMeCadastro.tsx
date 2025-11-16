@@ -57,7 +57,9 @@ async function sendEmailJS(params: Record<string, any>): Promise<{
     });
     if (!res.ok) {
       let msg = "";
-      try { msg = await res.text(); } catch {}
+      try {
+        msg = await res.text();
+      } catch {}
       return { ok: false, error: msg || `HTTP ${res.status}` };
     }
     return { ok: true };
@@ -271,15 +273,27 @@ const Stepper = ({ current }: { current: number }) => {
 
 // ===================== Componente principal =====================
 export default function FlyMeCadastro() {
-  // Fonte opcional e overflow-x fix
+  // Fonte global + overflow-x fix
   React.useEffect(() => {
+    // carrega a fonte Scripter de forma confiável (PC + mobile)
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Scripter&display=swap";
+    document.head.appendChild(link);
+
+    // aplica a fonte e regras de scroll
     const css = document.createElement("style");
     css.innerHTML =
-      "@import url('https://fonts.googleapis.com/css2?family=Scripter&display=swap'); html,body{overflow-x:hidden;} :root,body,*{font-family:'Scripter',cursive;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
+      "html,body{overflow-x:hidden;} :root,body,*{font-family:'Scripter',cursive;} .no-scroll::-webkit-scrollbar{display:none;} .no-scroll{-ms-overflow-style:none;scrollbar-width:none;}";
     document.head.appendChild(css);
+
     return () => {
       try {
         document.head.removeChild(css);
+      } catch {}
+      try {
+        document.head.removeChild(link);
       } catch {}
     };
   }, []);
